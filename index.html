@@ -44,7 +44,7 @@
 
 * forSurvey
   * 弊社の主要プロダクト
-  * 業務用のマーケティングリサーチツール
+  * マーケティングリサーチツール
   * 運用実績10年
   * Webフレームワーク無し
   * バリバリの現役選手
@@ -59,17 +59,20 @@
 
 ~~~php
 <?php
-require_once("DB/DBCon.class.php");
-require_once("TL/TLclDB.class.php");
-require_once("TL/TLreDB.class.php");
-require_once("TL/TLrauDB.class.php");
-require_once("TL/TLResearchApplicationDB.class.php");
-require_once("CM/CMSmarty.class.php");
-require_once("CM/CMHttpUtil.php");
-require_once("CM/CMConst.php");
-require_once("CM/CMUtil.php");
-require_once("CM/CMMultidevice.php");
-require_once("CM/CMClientUtil.php");
+require_once("DB/hoge.class.php");
+require_once("TL/hoge.class.php");
+require_once("TL/hoge2.class.php");
+require_once("TL/hoge3.class.php");
+require_once("TL/hoge4.class.php");
+require_once("CM/fuga.class.php");
+require_once("CM/fuga2.class.php");
+require_once("CM/fuga3.class.php");
+require_once("CM/fuga4.class.php");
+require_once("CM/fuga5.class.php");
+require_once("CM/fuga6.class.php");
+require_once("hogehoge.php");
+require_once("fugafuga.php");
+require_once("XML/hogefuga.class.php");
 ...以下略
 ~~~
 
@@ -80,19 +83,17 @@ require_once("CM/CMClientUtil.php");
 * 途中でexit
 
 ~~~php
-if($_SESSION['id'] == "") {
-    OutputError("Session Error. Please login again.");
+if ($_SESSION['id'] == "") {
+    error("Session Error. Please login again.");
     exit;
 }
-$kinou_id = kKINOU_ID_ENQUETE;
-if($_SESSION["access_privilege"][$kinou_id] != hoge) {
-    OutputError("You cannot access on this server.");
+if (!$_SESSION["access_privilege"]) {
+    error("You cannot access on this server.");
     exit;
 }
-$rc = util_LoadClientSetting( $_SESSION["cl_code"] );
-if($rc == FALSE) {
-    log_error( "cannot read client setting [" . $_SESSION["cl_code"] . "]", __FILE__ );
-    OutputError($LangBox[$_SESSION["lang_c"]]["common_error"]["2"]);
+$dbCon = new DBCon();
+if (!$dbCon->connect(kDB_NAME)) {
+    error("Failed to connect DB.");
     exit;
 }
 ...以下略
