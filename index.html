@@ -24,8 +24,225 @@
 	<body>
 		<div class="reveal">
 			<div class="slides">
-				<section>Slide 1</section>
-				<section>Slide 2</section>
+        <section data-markdown="" data-separator="^\n---$" data-separator-vertical="^\n>>>$">
+        <script type="text/template">
+## レガシーなプロダクトで		  
+## テストしたかった話
+
+---
+
+## 自己紹介
+
+* トミー
+* Github : @kazu9su
+* Marketing Applications
+* 入社4年目
+
+---
+
+## テストしたかったもの
+
+* forSurvey
+  * 弊社の主要プロダクト
+  * 業務用のマーケティングリサーチツール
+  * 運用実績10年
+  * Webフレームワーク無し
+  * バリバリの現役選手
+  * 作りなおす予定無し
+  * レガシーコード
+
+---
+
+## レガシ〜①
+
+* require地獄
+
+~~~php
+<?php
+require_once("DB/DBCon.class.php");
+require_once("TL/TLclDB.class.php");
+require_once("TL/TLreDB.class.php");
+require_once("TL/TLrauDB.class.php");
+require_once("TL/TLResearchApplicationDB.class.php");
+require_once("CM/CMSmarty.class.php");
+require_once("CM/CMHttpUtil.php");
+require_once("CM/CMConst.php");
+require_once("CM/CMUtil.php");
+require_once("CM/CMMultidevice.php");
+require_once("CM/CMClientUtil.php");
+...以下略
+~~~
+
+---
+
+## レガシ〜②
+
+* 途中でexit
+
+~~~php
+if($_SESSION['id'] == "") {
+    OutputError("Session Error. Please login again.");
+    exit;
+}
+$kinou_id = kKINOU_ID_ENQUETE;
+if($_SESSION["access_privilege"][$kinou_id] != hoge) {
+    OutputError("You cannot access on this server.");
+    exit;
+}
+$rc = util_LoadClientSetting( $_SESSION["cl_code"] );
+if($rc == FALSE) {
+    log_error( "cannot read client setting [" . $_SESSION["cl_code"] . "]", __FILE__ );
+    OutputError($LangBox[$_SESSION["lang_c"]]["common_error"]["2"]);
+    exit;
+}
+...以下略
+~~~
+
+---
+
+## レガシ〜③
+
+* コンテキストで変わる定数
+
+~~~
+config/
+├ 001/
+│   └ const.php
+└ 002/
+       └ const.php
+~~~
+
+* config/001/const.php
+
+~~~php
+define("hoge", 1);
+~~~
+
+* config/002/const.php
+
+~~~php
+define("hoge", 2);
+~~~
+
+---
+
+### レガシ〜④
+
+![10000lines](img/10000lines.png)
+
+---
+
+## 状況
+* (当然)テストは入ってない
+* コードの大部分はベタ書き
+* 単体でテストするのは難しい
+* 何とかテストの仕組みを取り入れたい！
+
+---
+
+## テストする単位を考えてみた
+
+---
+
+## 単位？
+
+ * 単体 ... クラス(の中の関数)?
+ * 機能 ... ある一連の機能?
+ * e2e ... システム全体?
+
+---
+
+## 機能?
+
+---
+
+* index.php
+
+~~~php
+<?php
+header("Content-Type: text/html");
+header('Location: http://www.example.com/');
+session_start();
+$id = $_SESSION['id'];
+$username = $_GET['username'];
+
+...
+
+echo ('OK');
+
+exit;
+?>
+~~~
+
+---
+
+## スクリプト単位で  
+## テストできればいいんじゃない？
+
+---
+
+## そこで
+
+---
+
+### 作ってみた
+
+* FunctionalTester
+	* Github
+		* https://github.com/kazu9su/functional-tester
+	* Packagist
+		* https://packagist.org/packages/kazu9su/functional-tester
+	* Qiita
+		* http://qiita.com/tooooooooomy/items/07bea3932bc4fdcb68ab
+
+---
+
+~~~php
+<?php
+class IndexTest extends PHPUnit_Framework_TestCase
+{
+    public function testIndex()
+    {
+        $tester = new FunctionalTester\FunctionalTester();
+        $tester->setSession(['id' => 'hogehoge']);
+        $tester->setDocumentRoot('/path/to/src');
+        $tester->setIncludePath('.:/usr/bin/php');
+
+        $response = $tester->get('index.php', ['username' => 'hogehoge']);
+
+        $this->assertEquals(200, $response->getStatusCode());
+        $this->assertEquals('OK', $response->getBody());
+    }
+}
+~~~
+
+---
+
+## 実現できたこと
+
+* スクリプト単位での機能テスト
+* レガシーなプロダクトをテストできる環境
+
+---
+
+## とはいえ
+
+* 網羅テストはできない
+* 単体テストしたい
+
+---
+
+## まとめ
+* レガシーコードでもテストはできる
+* 銀の弾丸ではない
+* テスト楽しい！
+
+---
+
+## ご清聴ありがとうございました
+        </script>
+        </section>
+
 			</div>
 		</div>
 
@@ -36,7 +253,6 @@
 			// More info https://github.com/hakimel/reveal.js#configuration
 			Reveal.initialize({
 				history: true,
-
 				// More info https://github.com/hakimel/reveal.js#dependencies
 				dependencies: [
 					{ src: 'plugin/markdown/marked.js' },
